@@ -13,7 +13,7 @@ class TodoListModel extends ChangeNotifier {
   bool isLoading = true;
   int? taskCount;
   final String _rpcUrl = "http://10.0.2.2:8545";
-  final String _wsUrl = "ws://127.0.0.1:8545/";
+  final String _wsUrl = "ws://10.0.2.2:8545/";
 
 
   //自分のPRIVATE_KEYを追加してください。
@@ -39,10 +39,9 @@ class TodoListModel extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    // _client = Web3Client(_rpcUrl, Client(), socketConnector: () {
-    //   return IOWebSocketChannel.connect(Uri.parse(_wsUrl)).cast<String>();
-    // });
-    _client = Web3Client(_rpcUrl, Client());
+    _client = Web3Client(_rpcUrl, Client(), socketConnector: () {
+      return IOWebSocketChannel.connect(_wsUrl).cast<String>();
+    });
 
     await getAbi();
     await getCredentials();
@@ -60,17 +59,15 @@ class TodoListModel extends ChangeNotifier {
     _abiCode = jsonEncode(jsonAbi["abi"]);
 
     // コントラクトアドレスの取得
-    _contractAddress =
-        EthereumAddress.fromHex("0x5fbdb2315678afecb367f032d93f642f64180aa3");
-    // EthereumAddress.fromHex(jsonAbi["networks"]["2"]["address"]);
+
+    _contractAddress = EthereumAddress.fromHex("0x8A791620dd6260079BF849Dc5567aDC3F2FdC318");
   }
 
   //秘密鍵を渡して`Credentials`クラスのインスタンスを生成する。
   Future<void> getCredentials() async {
-
-    // _credentials = await _client!.credentialsFromPrivateKey(_privateKey);
     // Private Keyを暗号化してる？
     _credentials = EthPrivateKey.fromHex(_privateKey);
+
 
     // アカウントアドレスを取得する？
     _ownAddress = await _credentials!.extractAddress();
@@ -121,14 +118,17 @@ class TodoListModel extends ChangeNotifier {
   addTask(String taskNameData) async {
     isLoading = true;
     notifyListeners();
-    await _client!.sendTransaction(
+
+   final result = await _client!.sendTransaction(
       _credentials!,
       Transaction.callContract(
         contract: _contract!,
         function: _createTask!,
         parameters: [taskNameData],
       ),
+      chainId: 31337,
     );
+
     await getTodos();
   }
 
@@ -143,6 +143,7 @@ class TodoListModel extends ChangeNotifier {
         function: _updateTask!,
         parameters: [BigInt.from(id), taskNameData],
       ),
+      chainId: 31337,
     );
     await getTodos();
   }
@@ -158,6 +159,7 @@ class TodoListModel extends ChangeNotifier {
         function: _toggleComplete!,
         parameters: [BigInt.from(id)],
       ),
+      chainId: 31337,
     );
     await getTodos();
   }
@@ -173,6 +175,7 @@ class TodoListModel extends ChangeNotifier {
         function: _deleteTask!,
         parameters: [BigInt.from(id)],
       ),
+      chainId: 31337,
     );
     await getTodos();
   }
