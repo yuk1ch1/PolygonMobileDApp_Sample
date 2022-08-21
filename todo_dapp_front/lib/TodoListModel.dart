@@ -18,7 +18,8 @@ class TodoListModel extends ChangeNotifier {
 
 
   //自分のPRIVATE_KEYを追加してください。
-  final String _privateKey = "";
+  final String _privateKey =
+      "METAMASK PRIVATE KEY";
 
   Web3Client? _client;
 
@@ -44,7 +45,7 @@ class TodoListModel extends ChangeNotifier {
   //スマートコントラクトの`ABI`を取得し、デプロイされたコントラクトのアドレスを取り出す。
   Future<void> getAbi() async {
     // コントラクトアドレスの取得
-    _contractAddress = EthereumAddress.fromHex("0x5fbdb2315678afecb367f032d93f642f64180aa3");
+    _contractAddress = EthereumAddress.fromHex("0x5FbDB2315678afecb367f032d93F642f64180aa3");
   }
 
   //秘密鍵を渡して`Credentials`クラスのインスタンスを生成する。
