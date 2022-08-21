@@ -12,7 +12,7 @@ module.exports = {
   networks: {
     hardhat: {},
     mumbai: {
-      url: process.env.API_URL,
+      url: API_URL,
       accounts: [`0x${PRIVATE_KEY}`]
     }
   },
