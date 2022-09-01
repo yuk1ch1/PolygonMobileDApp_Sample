@@ -7,17 +7,18 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:todo_dapp_front/pages/LoginPage.dart';
 
 class TodoListModel extends ChangeNotifier {
   List<Task> todos = [];
   bool isLoading = true;
   int? taskCount;
-  final String _rpcUrl = "http://10.0.2.2:8545";
-  final String _wsUrl = "ws://10.0.2.2:8545/";
+  final String _rpcUrl = "URL"; //  "http://10.0.2.2:8545";
+  final String _wsUrl = "URL";//"ws://10.0.2.2:8545/";
 
 
   //自分のPRIVATE_KEYを追加してください。
-  final String _privateKey = "";
+  final String _privateKey = "METAMASK PRIVATE KEY";
 
   Web3Client? _client;
   String? _abiCode;
@@ -59,15 +60,13 @@ class TodoListModel extends ChangeNotifier {
     _abiCode = jsonEncode(jsonAbi["abi"]);
 
     // コントラクトアドレスの取得
-
-    _contractAddress = EthereumAddress.fromHex("0x8A791620dd6260079BF849Dc5567aDC3F2FdC318");
+    _contractAddress = EthereumAddress.fromHex("0x1d11118a6CD0112e55966c49e105b3f4c2C023Cc");
   }
 
   //秘密鍵を渡して`Credentials`クラスのインスタンスを生成する。
   Future<void> getCredentials() async {
     // Private Keyを暗号化してる？
     _credentials = EthPrivateKey.fromHex(_privateKey);
-
 
     // アカウントアドレスを取得する？
     _ownAddress = await _credentials!.extractAddress();
@@ -76,7 +75,6 @@ class TodoListModel extends ChangeNotifier {
   //`_abiCode`と`_contractAddress`を使用して、スマートコントラクトのインスタンスを作成する。
   Future<void> getDeployedContract() async {
     // コントラクトオブジェクトを取得
-
     _contract = DeployedContract(
         ContractAbi.fromJson(_abiCode!, "TodoContract"), _contractAddress!);
     _taskCount = _contract!.function("taskCount");
@@ -100,11 +98,11 @@ class TodoListModel extends ChangeNotifier {
           contract: _contract!, function: _todos!, params: [BigInt.from(i)]);
       if (temp[1] != "") {
         todos.add(
-          Task(
-            id: (temp[0] as BigInt).toInt(),
-            taskName: temp[1],
-            isCompleted: temp[2]
-          )
+            Task(
+                id: (temp[0] as BigInt).toInt(),
+                taskName: temp[1],
+                isCompleted: temp[2]
+            )
         );
       }
     }
@@ -118,17 +116,16 @@ class TodoListModel extends ChangeNotifier {
   addTask(String taskNameData) async {
     isLoading = true;
     notifyListeners();
-
-   final result = await _client!.sendTransaction(
-      _credentials!,
-      Transaction.callContract(
-        contract: _contract!,
-        function: _createTask!,
-        parameters: [taskNameData],
-      ),
-      chainId: 31337,
+    final result = await _client!.sendTransaction(
+        _credentials!,
+        Transaction.callContract(
+          contract: _contract!,
+          function: _createTask!,
+          parameters: [taskNameData],
+          from: EthereumAddress.fromHex(provider.connector.session.accounts[0]),
+        ),
+        chainId: 80001
     );
-
     await getTodos();
   }
 
@@ -143,7 +140,7 @@ class TodoListModel extends ChangeNotifier {
         function: _updateTask!,
         parameters: [BigInt.from(id), taskNameData],
       ),
-      chainId: 31337,
+      chainId: 80001,
     );
     await getTodos();
   }
@@ -159,7 +156,7 @@ class TodoListModel extends ChangeNotifier {
         function: _toggleComplete!,
         parameters: [BigInt.from(id)],
       ),
-      chainId: 31337,
+      chainId: 80001,
     );
     await getTodos();
   }
@@ -175,7 +172,7 @@ class TodoListModel extends ChangeNotifier {
         function: _deleteTask!,
         parameters: [BigInt.from(id)],
       ),
-      chainId: 31337,
+      chainId: 80001,
     );
     await getTodos();
   }
